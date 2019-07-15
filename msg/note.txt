@@ -1,0 +1,27 @@
+===========================Requiring Logins===========================
+from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from . import models
+
+
+class List(generic.ListView):
+    model = models.Product
+
+
+class Detail(generic.DetailView):
+    model = models.Product
+    
+
+class Create(LoginRequiredMixin, generic.CreateView):
+    fields = ("name", "description", "discount", "price")
+    model = models.Product
+	
+	
+
+===========================LoginView===========================
+Django's section on logging users in 
+<https://docs.djangoproject.com/en/1.9/topics/auth/default/#how-to-log-a-user-in> is definitely worth a read, 
+especially for some of the more behind-the-scenes parts of 
+using login() and authenticate(). Also read about the authentication views.
+<https://docs.djangoproject.com/en/1.9/topics/auth/default/#module-django.contrib.auth.views>
