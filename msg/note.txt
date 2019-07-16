@@ -25,3 +25,78 @@ Django's section on logging users in
 especially for some of the more behind-the-scenes parts of 
 using login() and authenticate(). Also read about the authentication views.
 <https://docs.djangoproject.com/en/1.9/topics/auth/default/#module-django.contrib.auth.views>
+
+----------------urls.py-------------------
+from django.conf.urls import url, include
+from . import views
+
+urlpatterns = [
+    url(r"^accounts/", include("accounts.urls", namespace="accounts")),
+    url(r'accounts/', include('django.contrib.auth.urls')),
+]
+
+----------------registration/login.html-------------------
+{% block body_content %}
+<div class="container">
+	<h1>Log into your account</h1>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Log in">
+    </form>
+</div>
+{% endblock %}
+
+
+
+=========================LogoutView and SignUpView=========================
+The logout function is your best bet for logging a user out.
+
+Signing users up can be a very specific thing for your site, 
+so be sure to make that process fit your site. <django-registration>
+<https://django-registration.readthedocs.io/en/2.1.2/>is a very popular package for customizing the registration workflow and one I definitely recommend checking out.
+
+If you'd like to do authentication and registration through third-party sites, let letting a user sign up with their Twitter account, check out 
+<django-allauth>/<https://readthedocs.org/projects/django-allauth/>
+or <python-social-auth>/<http://psa.matiasaguirre.net/docs/index.html>.
+
+----------------signup and login immediately.py-------------------
+from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth import authenticate, login
+from django.views import generic
+
+from . import forms
+
+
+class SignUp(generic.CreateView):
+    form_class = forms.UserCreateForm
+    template_name = 'accounts/signup.html'
+    success_url = reverse_lazy("products:list")
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = authenticate(
+					username=form.cleaned_data['username'], 
+					password=form.cleaned_data['password1']
+				)
+        if user is not None:
+            if user.is_active:
+                login(self.request, user)
+            return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
