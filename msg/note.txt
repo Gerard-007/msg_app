@@ -86,8 +86,57 @@ class SignUp(generic.CreateView):
 
 
 
+=========================Custom User Manager=========================
+Django's models use model managers to interact with the ORM. 
+When you're going to create a custom user, you need to create a custom model 
+manager for it, too.
+
+You can see a <full example> 
+<https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#a-full-example> 
+in the Django docs. Check these docs if you want to know 
+<more about managers> <https://docs.djangoproject.com/en/1.9/topics/db/managers/>
+
+----------------User/Admin user creation model-------------------
+from django.contrib.auth.models import BaseUserManager
+		
+class UserManager(BaseUserManager):
+    
+    def create_user(self, email, dob, accepted_tos=False, password=None):
+        #Check and see if user accepts terms and aggreements...
+        if accepted_tos != True:
+            raise ValueError("You have to accept terms and aggreement before proceeding.")
+        #Create user model to be stored in memory...
+        user = self.model(
+            email = self.normalize_email(email),
+            dob = dob,
+            accepted_tos = True,
+        )
+        user.set_password(password)
+        user.save()
+        return user
+    
+    def create_superuser(self, email, dob, password):
+        user = self.create_user(
+            email,
+            dob,
+            accepted_tos=True,
+            password=password
+        )
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
 
 
+
+=========================Custom User Model=========================
+Now that the custom user model is in place, it's time to create the custom user!
+You can see a <full example>
+<https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#a-full-example>
+in the Django docs.
+
+Controlling your users through the Django admin <requires a bit more work> 
+<https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#custom-users-and-django-contrib-admin>.
 
 
 

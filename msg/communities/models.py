@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
+from django.conf import settings
 
 import misaka
 
@@ -18,7 +19,7 @@ class Community(models.Model):
     slug = models.SlugField(allow_unicode=True, unique=True)
     description = models.TextField(blank=True, default='')
     description_html = models.TextField(editable=False, default='', blank=True)
-    members = models.ManyToManyField(User, through="CommunityMember")
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through="CommunityMember")
 
     def __str__(self):
         return self.name
@@ -38,7 +39,7 @@ class Community(models.Model):
 
 class CommunityMember(models.Model):
     community = models.ForeignKey(Community, related_name="memberships")
-    user = models.ForeignKey(User, related_name="communities")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="communities")
     role = models.IntegerField(choices=MEMBERSHIP_CHOICES, default=1)
 
     def __str__(self):

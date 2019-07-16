@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 from django.shortcuts import render
-from django.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic import FormView, RedirectView, CreateView
 

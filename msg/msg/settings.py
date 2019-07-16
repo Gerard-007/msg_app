@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'communities',
     'posts',
+	'accounts',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -131,3 +132,13 @@ LOGIN_REDIRECT_URL = "posts:all"
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_email")
+
+'''
+Auth model to use for this project...
+#Import we do: 
+from django.conf import settings
+
+#Referencing it as Foreignkey or ManyToManyField...
+field = models.FieldType(settings.AUTH_USER_MODEL)
+'''
+AUTH_USER_MODEL = "accounts.User"
