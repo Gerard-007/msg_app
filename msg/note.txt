@@ -21,7 +21,8 @@ class Create(LoginRequiredMixin, generic.CreateView):
 
 ===========================LoginView===========================
 Django's section on logging users in 
-<https://docs.djangoproject.com/en/1.9/topics/auth/default/#how-to-log-a-user-in> is definitely worth a read, 
+<https://docs.djangoproject.com/en/1.9/topics/auth/default/#how-to-log-a-user-in> 
+is definitely worth a read, 
 especially for some of the more behind-the-scenes parts of 
 using login() and authenticate(). Also read about the authentication views.
 <https://docs.djangoproject.com/en/1.9/topics/auth/default/#module-django.contrib.auth.views>
@@ -138,11 +139,62 @@ in the Django docs.
 Controlling your users through the Django admin <requires a bit more work> 
 <https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#custom-users-and-django-contrib-admin>.
 
+----------------user models.py-------------------
+from django.contrib.auth.models import (
+    PermissionsMixin,
+    BaseUserManager,
+    AbstractBaseUser
+)
+from django.db import models
+from django.utils import timezone
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, dob, accepted_tos=None, password=None):
+        if not accepted_tos:
+            raise ValueError("Users must accept the terms of service")
+
+        user = self.model(
+            email=self.normalize_email(email),
+            dob=dob,
+            accepted_tos=True
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, dob, password):
+        user = self.create_user(
+            email,
+            dob,
+            accepted_tos=True,
+            password=password
+        )
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
+    
+
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    dob = models.DateField()
+    accepted_tos = models.BooleanField()
+    is_staff = models.BooleanField(default=False)
+    joined_at = models.DateTimeField(default=timezone.now)
+    
+    objects = UserManager()
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["dob"]
 
 
 
-
-
+=========================Permissions=========================
+Permissions control what users are allowed to do.
+Permissions get into one of the hairier parts of Django, the 
+<contentypes> framework. Have a look through the <contenttypes docs> <https://docs.djangoproject.com/en/1.10/ref/contrib/contenttypes/>
+if you want to know more. In short, though, it's a model that holds a reference 
+to every non-abstract model in your project.
 
 
 
