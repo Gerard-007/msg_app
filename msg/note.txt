@@ -206,7 +206,8 @@ Now that you know what permissions are, let's add a custom one and
 require them for actions on the site.
 
 The PermissionRequiredMixin is from 
-<Django> <https://docs.djangoproject.com/en/1.9/topics/auth/default/#the-permissionrequiredmixin-mixin>
+<Django> 
+<https://docs.djangoproject.com/en/1.9/topics/auth/default/#the-permissionrequiredmixin-mixin>
 itself, and it only checks for a certain permission. 
 If you need to check for multiple permissions, 
 <django-braces> offers a <MultiplePermissionsRequiredMixin> 
