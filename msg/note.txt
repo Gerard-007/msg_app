@@ -209,13 +209,150 @@ If you need to check for multiple permissions,
 <https://django-braces.readthedocs.io/en/latest/access.html#multiplepermissionsrequiredmixin>.
 
 
+----------------Product models.py-------------------
+from django.core.urlresolvers import reverse
+from django.db import models
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField()
+    discount = models.DecimalField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.name
+      
+    def get_absolute_url(self):
+        return reverse("products:detail", kwargs={"pk": self.pk})
+    
+    class Meta:
+        #creating a permission for user to give discount...
+        permissions = (
+            ("can_give_discount", "give_discount"),
+        )
+
+
+----------------Product views.py-------------------
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
+
+from . import models
+
+
+class List(generic.ListView):
+    model = models.Product
+
+
+class Detail(generic.DetailView):
+    model = models.Product
+    
+
+class Create(LoginRequiredMixin, generic.CreateView):
+    fields = ("name", "description", "discount", "price")
+    model = models.Product
+    
+	'''
+	Here we check if the user has the right permission to give discount
+	otherwise we just det the discount to zero
+	'''
+	def form_valid(self, form):
+		'''
+		We now use has_perm("permissions") to see if user has permission
+		To give discount.
+		'''
+        resp = super().form_valid(form)
+        self.object = form.save(commit=False)
+        if not self.request.user.has_perm("products.can_give_discount"):
+            self.object.discount = 0
+            self.object.save()
+        return resp
 
 
 
 
+=========================Bringing It All Together=========================
+With custom permissions in place, now it's time to add the final pieces to the templates.
+
+Checking {{ perms }} in templates is a great way to show and hide bits and pieces based on 
+what a user is allowed to do. You shouldn't show them buttons they can't actually click!
+
+You can also check <has_perm> or <has_perms> on a user model, too, 
+to see if they have the appropriate permission for a bit of logic.
+
+For row-level or object-level permissions, <django-guardian>
+<https://django-guardian.readthedocs.io/en/stable/>
+is a great project to check out.
 
 
+----------------Editors create Group views.py-------------------
+from django.contrib.auth.models import (
+    PermissionsMixin,
+    BaseUserManager,
+    AbstractBaseUser,
+    Permission,
+    Group
+)
+from django.db import models
+from django.utils import timezone
 
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, dob, accepted_tos=None, password=None):
+        if not accepted_tos:
+            raise ValueError("Users must accept the terms of service")
+
+        user = self.model(
+            email=self.normalize_email(email),
+            dob=dob,
+            accepted_tos=True
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, dob, password):
+        user = self.create_user(
+            email,
+            dob,
+            accepted_tos=True,
+            password=password
+        )
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
+      
+    def create_editor(self, email, dob, password):
+        user = self.create_user(
+            email,
+            dob,
+            accepted_tos=True,
+            password=password
+        )
+        try:
+            editors = Group.objects.get(name__iexact="Editors")
+            user.groups.add(editors)
+            user.save()
+        except Group.DoesNotExist:
+            editors = Group.objects.create(name="Editors")
+            editors.permissions.add(Permission.objects.get(codename="can_give_discount"))
+            user.groups.add(editors)
+            user.save()
+        return user
+
+    
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    dob = models.DateField()
+    accepted_tos = models.BooleanField()
+    is_staff = models.BooleanField(default=False)
+    joined_at = models.DateTimeField(default=timezone.now)
+    
+    objects = UserManager()
+    
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["dob"]
 
 
 
