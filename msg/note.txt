@@ -55,9 +55,11 @@ The logout function is your best bet for logging a user out.
 
 Signing users up can be a very specific thing for your site, 
 so be sure to make that process fit your site. <django-registration>
-<https://django-registration.readthedocs.io/en/2.1.2/>is a very popular package for customizing the registration workflow and one I definitely recommend checking out.
+<https://django-registration.readthedocs.io/en/2.1.2/>is a very popular package for 
+customizing the registration workflow and one I definitely recommend checking out.
 
-If you'd like to do authentication and registration through third-party sites, let letting a user sign up with their Twitter account, check out 
+If you'd like to do authentication and registration through third-party sites, 
+let letting a user sign up with their Twitter account, check out 
 <django-allauth>/<https://readthedocs.org/projects/django-allauth/>
 or <python-social-auth>/<http://psa.matiasaguirre.net/docs/index.html>.
 
@@ -192,7 +194,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 =========================Permissions=========================
 Permissions control what users are allowed to do.
 Permissions get into one of the hairier parts of Django, the 
-<contentypes> framework. Have a look through the <contenttypes docs> <https://docs.djangoproject.com/en/1.10/ref/contrib/contenttypes/>
+<contentypes> framework. Have a look through the <
+contenttypes docs> <https://docs.djangoproject.com/en/1.10/ref/contrib/contenttypes/>
 if you want to know more. In short, though, it's a model that holds a reference 
 to every non-abstract model in your project.
 
@@ -202,7 +205,8 @@ to every non-abstract model in your project.
 Now that you know what permissions are, let's add a custom one and 
 require them for actions on the site.
 
-The PermissionRequiredMixin is from <Django> <https://docs.djangoproject.com/en/1.9/topics/auth/default/#the-permissionrequiredmixin-mixin>
+The PermissionRequiredMixin is from 
+<Django> <https://docs.djangoproject.com/en/1.9/topics/auth/default/#the-permissionrequiredmixin-mixin>
 itself, and it only checks for a certain permission. 
 If you need to check for multiple permissions, 
 <django-braces> offers a <MultiplePermissionsRequiredMixin> 
